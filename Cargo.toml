@@ -1,23 +1,13 @@
 [package]
-name = "nucleo-f446"
+name = "stm32f446-hello"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# 【変更点】 v0.20 -> v0.17.1 (最も安定しているバージョン)
-# feature名は "stm32f446" でOKです
-stm32f4xx-hal = { version = "0.17.1", features = ["stm32f446", "rt"] }
-
-# v0.17.1 は embedded-hal v0.2 系に依存しています
-# バージョン指定を緩くして、HALが要求するものに合わせます
-embedded-hal = "0.2" 
-
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
-# panic-halt = "0.2"
-panic-probe = { version = "0.3", features = ["print-rtt"] } 
-rtt-target = { version = "0.5" }
+panic-halt = "0.2" # パニック時は停止する
+embedded-hal = "0.2"
+nb = "1.1"
+stm32f4xx-hal = { version = "0.17", features = ["stm32f446", "rt"] }
 
-# 念のため、v2リゾルバを明示（edition 2021ならデフォルトですが、保険）
-[package.metadata.cargo] 
-resolver = "2"
