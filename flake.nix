@@ -3,7 +3,7 @@
   inputs = {
     # urlでどこからダウンロードするか指定する
     # 数十万のパッケージが入った巨大なリポジトリ
-    nimxpkgs.url = "github:nixos/nixpkgs/nimxos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     # Rust用
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
@@ -20,7 +20,7 @@
       };
 
       # Rust toolchainのカスタマイズ
-      myRust = pkgs.rust-bin.stable.latest.default.override {
+      myRust = pkgs.rust-bin.stable.latest.minimal.override {
         extensions = [
           "rust-src"
           "rust-analyzer"
@@ -36,7 +36,7 @@
       devShells.${system}.default = pkgs.mkShell {
         buildInputs = [
           myRust
-          pkgs.probe-rs
+          pkgs.probe-rs-tools
           pkgs.flip-link
         ];
       }; 
