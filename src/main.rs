@@ -12,18 +12,58 @@ use stm32f4xx_hal::{
     i2c::I2c,
 };
 
+// =====ros2msg=====
+// sensor_msgs/IMU
+//
+// std_msgs/Header header
+// geometry_msgs/Quaternion orientation
+// float64[9] orientation_covariance
+// geometry_msgs/Vector3 angular_velocity
+// float64[9] angular_velocity_covariance
+// geometry_msgs/Vector3 linear_acceleration
+// float64[9] linear_acceleration_covariance
+
 // --- BNO055 レジスタ定義 ---
 // データシート: https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bno055-ds000.pdf
 const BNO055_ADDR: u8    = 0x28; // COM3ピンがLOWの場合のアドレス (Highなら0x29)
 const REG_CHIP_ID: u8    = 0x00; // チップIDレジスタ (固定値 0xA0 が入っているはず)
+                                 //
 const REG_EULER_DATA: u8 = 0x1A; // オイラー角データの先頭アドレス (Heading LSB)
-const REG_CALIB_STAT: u8 = 0x35; // キャリブレーションステータス
 const REG_OPR_MODE: u8   = 0x3D; // 動作モード設定レジスタ
+                                  
+// Raw accelerometer output
+// Use this for tilt/orientation
+// Don't use raw accel in the program !!!!
+//const REG_ACC_DATA_X_LSB: u8 = 0x08;
+
+// Use this for movement.
+// Linear Acceleration
+// Use NDOF mode
+const REG_LIN_DATA_X_LSB: u8 = 0x29;
+
+
+//const REG_MAG_DATA_X_LSB: u8 = 0x0E;
+const REG_GYR_DATA_X_LSB: u8 =  0x14;
+
+// orientation
+// I won't use Euler angles
+//const REG_EUR_DATA_X_LSB: u8 = 0x1A;
+const REG_QUA_DATA_W_LSB: u8 = 0x20; // w -> x -> y -> z
+
+// gravity vector
+//const REG_GRV_DATA_X_LSB: u8 = 0x2E; // 
+
+//const REG_TEMP: u8 = 0x34; // temperature data
+const REG_CALIB_STAT: u8 = 0x35; // キャリブレーションステータス
 const REG_SYS_TRIGGER: u8 = 0x3F; // リセット等に使用
+
+
 
 // --- 動作モード ---
 const MODE_CONFIG: u8    = 0x00; // 設定モード (設定変更時はこれにする)
 const MODE_NDOF: u8      = 0x0C; // 9軸フュージョンモード (推奨: 自動補正あり)
+
+const BAUD_RATE: u8 = 115_200;
 
 #[entry]
 fn main() -> ! {
