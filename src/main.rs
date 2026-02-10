@@ -101,6 +101,7 @@ fn main() -> ! {
     let sda = gpiob.pb9.into_alternate().set_open_drain().internal_pull_up(true);
     
     // I2Cバスの作成 (100kHzは安定重視。高速化したい場合は400.kHz()へ)
+    // 100kHz is fine
     let mut i2c = I2c::new(dp.I2C1, (scl, sda), 100.kHz(), &clocks);
 
     // --- 起動シーケンス開始 ---
@@ -109,8 +110,10 @@ fn main() -> ! {
     // BNO055は電源投入後、動作可能になるまで時間がかかる (約650ms)
     delay.delay_ms(700_u32);
 
-    // 4. 接続確認 (Chip ID Check)
+    // Chip ID Check
     let mut id_buf = [0u8; 1];
+
+    // Infinite retry!
     loop {
         // デバイスが見つかるまで無限にリトライする（配線抜けなどを考慮）
         match i2c.write_read(BNO055_ADDR, &[REG_CHIP_ID], &mut id_buf) {
@@ -153,6 +156,14 @@ fn main() -> ! {
         // I2C通信は外部要因で失敗する可能性があるので Result をチェックする
         let euler_res = i2c.write_read(BNO055_ADDR, &[REG_EULER_DATA], &mut euler_buf);
         let calib_res = i2c.write_read(BNO055_ADDR, &[REG_CALIB_STAT], &mut calib_buf);
+
+        // 実際に使うデータ
+        let mut quat_buf = [0u8; 8]; 
+        let quat_res = i2c.write_read(BNO055_ADDR, &[REG_QUA_DATA_W_LSB], &mut quat_buf);
+        let mut gyro_buf = [0u8; 6];
+        let gyro_res = i2c.write_read(BNO055_ADDR, &[REG_GYR_DATA_X_LSB], &mut gyro_res);
+        let mut linacc_buf = [0u8; 6];
+        let linacc_res = i2c.write_read(BNO055_ADDR, &[REG_LIN_DATA_X_LSB], &mut linacc_buf);
 
         match (euler_res, calib_res) {
             (Ok(_), Ok(_)) => {
